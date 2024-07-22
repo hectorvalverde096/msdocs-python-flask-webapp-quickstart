@@ -1,6 +1,6 @@
 <!doctype html>
 <head>
-    <title>Hello Azure - Python Quickstart</title>
+    <title>Gerardo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
@@ -8,13 +8,62 @@
    <body>
      <main>
         <div class="px-4 py-3 my-2 text-center">
-            <img class="d-block mx-auto mb-4" src="{{ url_for('static', filename='images/azure-icon.svg') }}" alt="Azure Logo" width="192" height="192"/>
+            <img class="d-block mx-auto mb-4" src="{{ url_for('static', filename='images/gerardo_logo.png') }}" alt="Gerardo Logo" width="192" height="192"/>
             <!-- <img  src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
-            <h1 class="display-6 fw-bold">Hello {{name}}</h1>
+            <h1 class="display-6 fw-bold">¡Bienvenido!</h1>
             <p class="fs-5">
-                It is nice to meet you!
+                Aquí irá nuestro querido Gerardo, en cuanto sepamos como hacerlo. asndjasdjasdas
             </p>
-            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg px-4 gap-3">Back home</a>
+            <button class="btn btn-primary btn-lg px-4 gap-3" id="start-recording">Empezar grabación</button>
+            <button class="btn btn-primary btn-lg px-4 gap-3" id="stop-recording" disabled>Parar grabación</button>
+            <button class="btn btn-primary btn-lg px-4 gap-3" id="play-recording" disabled>Reproducir</button>
+            <p id="status"></p>
+            <audio id="audio-playback" controls></audio>
+        
+            <script>
+                let mediaRecorder;
+                let audioChunks = [];
+        
+                document.getElementById('start-recording').addEventListener('click', function() {
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(function(stream) {
+                            document.getElementById('status').textContent = 'Acceso al micrófono recibido';
+                            mediaRecorder = new MediaRecorder(stream);
+                            mediaRecorder.ondataavailable = function(event) {
+                                audioChunks.push(event.data);
+                            };
+                            mediaRecorder.onstop = function() {
+                                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                                const audioUrl = URL.createObjectURL(audioBlob);
+                                const audioPlayback = document.getElementById('audio-playback');
+                                audioPlayback.src = audioUrl;
+                                document.getElementById('play-recording').disabled = false;
+                                audioChunks = [];
+                            };
+                            mediaRecorder.start();
+                            document.getElementById('start-recording').disabled = true;
+                            document.getElementById('stop-recording').disabled = false;
+                            document.getElementById('status').textContent = 'Grabando...';
+                        })
+                        .catch(function(err) {
+                            document.getElementById('status').textContent = 'No se ha podido acceder al micrófono.';
+                            alert('No se puede acceder a tu micrófono. Comprueba los permisos.');
+                        });
+                });
+        
+                document.getElementById('stop-recording').addEventListener('click', function() {
+                    mediaRecorder.stop();
+                    document.getElementById('start-recording').disabled = false;
+                    document.getElementById('stop-recording').disabled = true;
+                    document.getElementById('status').textContent = 'Se paró la grabación.';
+                });
+        
+                document.getElementById('play-recording').addEventListener('click', function() {
+                    document.getElementById('audio-playback').play();
+                });
+            </script>
+            <p></p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg px-4 gap-3">Volver a la otra página</a>
           </div>
      </main>      
    </body>
